@@ -1,0 +1,46 @@
+.TH "StbSRCNN" 1 1.0 "4 Jan 2023" "User Manual"
+
+.SH NAME
+stbsrcnn
+
+.SH DESCRIPTION
+Image Super-Resolution using Convolutional Neural Network.
+
+\fBSRCNN\fR is a Implementation of Image Super-Resolution using SRCNN which is proposed by Chao Dong in 2014.
+
+ - If you want to find the details of SRCNN algorithm, please read the paper:
+   Chao Dong, Chen Change Loy, Kaiming He, Xiaoou Tang. Learning a Deep Convolutional Network for Image Super-Resolution, in Proceedings of European Conference on Computer Vision (ECCV), 2014
+ - If you want to download the training code(caffe) or test code(Matlab) for SRCNN, please [open your browse and visit](http://mmlab.ie.cuhk.edu.hk/projects/SRCNN.html) for more details.
+ - And thank you very much for Chao's work in SRCNN.
+
+.SH SYNOPSIS
+stbsrcnn [options] image_in out.png
+
+.SH OPTIONS
+.TP
+-p N.N
+specifies the share of the CNN in the result (default 1.0 [full])
+.TP
+-h
+show this help message and exit
+
+.SH EXAMPLE
+stbsrcnn images/butterfly.png images/butterfly.x2.png 
+
+ Load: butterfly.png
+ image: 256x256:3
+ resize: 512x512:3
+ method: bicubic
+ color: YCbCr
+ method: CNN
+ color: RGB
+ Save png: butterfly.x2.png
+
+.SH COPYRIGHT
+SRCNN is released under the GPL v2 License (refer to the LICENSE file for details).
+
+.SH SEE ALSO
+stbresize(1), imthreshold-shris(1), imagew(1)
+
+.SH CONTACTS
+Website: https://github.com/ImageProcessing-ElectronicPublications/stb-image-srcnn

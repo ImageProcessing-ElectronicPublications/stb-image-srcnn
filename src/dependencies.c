@@ -1,0 +1,9 @@
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define BICUBIC_IMPLEMENTATION
+#define SRCNN_IMPLEMENTATION
+#include "stb/stb_image.h"
+#include "stb/stb_image_write.h"
+#include "bicubic.h"
+#include "convdata.h"
+#include "srcnn.h"
