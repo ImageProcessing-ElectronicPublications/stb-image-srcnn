@@ -12,6 +12,13 @@ Image Super-Resolution using Convolutional Neural Network.
  - If you want to download the training code(caffe) or test code(Matlab) for SRCNN, please [open your browse and visit](http://mmlab.ie.cuhk.edu.hk/projects/SRCNN.html) for more details.
  - And thank you very much for Chao's work in SRCNN.
 
+This implementation uses a block algorithm.
+This is due to memory consumption in CNN.
+For complete processing, memory is required for 175 original images.
+With block processing, this size is reduced to 170 block size + 5 size of the original image.
+That allows you to process even large images.
+At the same time, block processing gives minor block artifacts, which I could only detect using [dssim](https://github.com/kornelski/dssim).
+
 ## build
 
 ### load submodules
@@ -44,7 +51,7 @@ $ make
 ```
 ## use
 
-The first and second parameters specify the paths to the image and the result {PNG}. The `-p` option specifies the share of the CNN in the resulting image (default 1.0).
+The first and second parameters specify the paths to the image and the result {PNG}. The `-b` option specifies the block size in block division (default 256). The `-p` option specifies the part of the CNN in the resulting image (default 0.707107, full 1.0).
 
 ```shell
 ./stbsrcnn ${IMAGE_PATH} ${IMAGE_PATH}.out.png
@@ -75,5 +82,5 @@ SRCNN (only x2, 512x512:3):
 You can run the following command to test the demo program.
 
 ```shell
-stbsrcnn images/butterfly.png butterfly.x2.png
+stbsrcnn -p 1 ../images/butterfly.png butterfly.x2.png
 ```

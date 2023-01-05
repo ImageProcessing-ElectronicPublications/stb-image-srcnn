@@ -9,30 +9,40 @@
 #include "bicubic.h"
 #include "srcnn.h"
 
-#define SRCNN_VERSION "1.0"
+#define SRCNN_VERSION "1.1"
 #define UP_SCALE 2
 #define CONV1_FILTERS   64      // the first convolutional layer
 #define CONV2_FILTERS   32      // the second convolutional layer
 
-void srcnn_usage(char* prog, float pcnn)
+void srcnn_usage(char* prog, int bsize, float pcnn)
 {
     printf("StbSRCNN version %s.\n", SRCNN_VERSION);
     printf("usage: %s [options] image_in out.png\n", prog);
     printf("options:\n");
-    printf("  -p N.M    specifies the share of the CNN in the result (default %f)\n", pcnn);
+    printf("  -b NUM    block size (default %d)\n", bsize);
+    printf("  -p N.N    specifies the part of the CNN in the result (default %f)\n", pcnn);
     printf("  -h        show this help message and exit\n");
 }
 
 int main(int argc, char **argv)
 {
     int resize_height = 0, resize_width = 0;
-    float pcnn = 1.0f;
+    int bsize = 256;
+    float pcnn = 0.707107f;
     int fhelp = 0;
     int opt;
-    while ((opt = getopt(argc, argv, ":p:h")) != -1)
+    while ((opt = getopt(argc, argv, ":b:p:h")) != -1)
     {
         switch(opt)
         {
+        case 'b':
+            bsize = atoi(optarg);
+            if (bsize < 64)
+            {
+                fprintf(stderr, "ERROR: block size %d < 64\n", bsize);
+                return 2;
+            }
+            break;
         case 'p':
             pcnn = atof(optarg);
             break;
@@ -51,7 +61,7 @@ int main(int argc, char **argv)
     }
     if(optind + 2 > argc || fhelp)
     {
-        srcnn_usage(argv[0], pcnn);
+        srcnn_usage(argv[0], bsize, pcnn);
         return 0;
     }
     const char *src_name = argv[optind];
@@ -110,15 +120,24 @@ int main(int argc, char **argv)
     printf("color: YCbCr\n");
     RGBtoYCbCrFilter(resize_data, resize_height, resize_width, channels, 1);
 
+    size_t cnn_size = (bsize + 12) * (bsize + 12);
+    unsigned char *cnn_block = NULL;
+    if (!(cnn_block = (unsigned char*)malloc(cnn_size * sizeof(unsigned char))))
+    {
+        fprintf(stderr, "ERROR: not memmory for CNN\n");
+        return 2;
+    }
     float *cnn_data = NULL;
-    if (!(cnn_data = (float*)malloc(resize_height * resize_width * CONV2_FILTERS * sizeof(float))))
+    if (!(cnn_data = (float*)malloc(cnn_size * CONV2_FILTERS * sizeof(float))))
     {
         fprintf(stderr, "ERROR: not memmory for CNN\n");
         return 2;
     }
 
-    printf("method: CNN\n");
-    Convolution99x11x55(resize_data, cnn_data, resize_height, resize_width, channels, pcnn);
+    printf("method: CNN(%dx%d)\n", bsize, bsize);
+//    Convolution99x11x55(resize_data, cnn_data, resize_height, resize_width, channels, pcnn);
+    SRCNNblock(resize_data, cnn_block, cnn_data, resize_height, resize_width, channels, bsize, pcnn);
+    printf("part CNN: %f\n", pcnn);
 
     printf("color: RGB\n");
     RGBtoYCbCrFilter(resize_data, resize_height, resize_width, channels, -1);
