@@ -51,7 +51,7 @@ $ make
 ```
 ## use
 
-The first and second parameters specify the paths to the image and the result {PNG}. The `-b` option specifies the block size in block division (default 256). The `-p` option specifies the part of the CNN in the resulting image (default 0.707107, full 1.0).
+The first and second parameters specify the paths to the image and the result {PNG}. The `-b` option specifies the block size in block division (default 256). The `-o` option specifies the block overlap (default 16 [~ blok size / 16]). The `-p` option specifies the part of the CNN in the resulting image (default 0.707107, full 1.0).
 
 ```shell
 ./stbsrcnn ${IMAGE_PATH} ${IMAGE_PATH}.out.png

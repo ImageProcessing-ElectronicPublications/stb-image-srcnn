@@ -1,4 +1,4 @@
-.TH "StbSRCNN" 1 1.1 "5 Jan 2023" "User Manual"
+.TH "StbSRCNN" 1 1.2 "5 Jan 2023" "User Manual"
 
 .SH NAME
 stbsrcnn
@@ -27,6 +27,9 @@ stbsrcnn [options] image_in out.png
 .TP
 -b NUM
 block size (default 256)
+.TP
+-o NUM
+overlap block (default 16 [~ blok size / 16])
 .TP
 -p N.N
 specifies the part of the CNN in the result (default 0.707107, full 1.0)

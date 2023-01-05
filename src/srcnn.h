@@ -22,7 +22,7 @@ extern "C" {
 #endif
 SRCNNAPI void RGBtoYCbCrFilter(unsigned char *src, int height, int width, int channels, int direct);
 SRCNNAPI void Convolution99x11x55(unsigned char *src, float* cnndst, int height, int width, int channels, float partcnn);
-SRCNNAPI void SRCNNblock(unsigned char *src, unsigned char *block, float* cnndst, int height, int width, int channels, int bsize, float partcnn);
+SRCNNAPI void SRCNNblock(unsigned char *src, unsigned char *block, float* cnndst, int height, int width, int channels, int bsize, int overlap, float partcnn);
 #ifdef __cplusplus
 }
 #endif
@@ -243,52 +243,50 @@ void Convolution99x11x55offset(unsigned char *src, float* cnndst, int height, in
     return;
 }
 
-void SRCNNblock(unsigned char *src, unsigned char *block, float* cnndst, int height, int width, int channels, int bsize, float partcnn)
+void SRCNNblock(unsigned char *src, unsigned char *block, float* cnndst, int height, int width, int channels, int bsize, int overlap, float partcnn)
 {
-    int i, j, bd, bb, bo, bs2, bm, bn, x, y, x0, y0, xf, yf;
+    int i, j, bb, bs2, bm, bn, x, y, x0, y0, xf, yf;
     size_t ki, k;
+    int offset = 6; // offset >= 4 + 2 = 6 !!!
 
-    // offset >= 4 + 2 = 6 !!!
-    bd = 6;
-    bb = bsize + bd + bd;
-    bo = bsize / 16;
-    bs2 = bsize - bo - bo;
+    bb = bsize + 2 * (offset + overlap);
+    bs2 = bsize;
     bm = (height + bs2 - 1) / bs2;
     bn = (width + bs2 - 1) / bs2;
 
     for (i = 0; i < bm; i++)
     {
-        y0 = i * bs2 - bo;
+        y0 = i * bs2 - overlap;
         for (j = 0; j < bn; j++)
         {
-            x0 = j * bs2 - bo;
+            x0 = j * bs2 - overlap;
             k = 0;
             for (y = 0; y < bb; y++)
             {
-                yf = y0 + y - bd;
+                yf = y0 + y - offset;
                 yf = (yf < 0) ? 0 : (yf < height) ? yf : (height - 1);
                 for (x = 0; x < bb; x++)
                 {
-                    xf = x0 + x - bd;
+                    xf = x0 + x - offset;
                     xf = (xf < 0) ? 0 : (xf < width) ? xf : (width - 1);
                     ki = (yf * width + xf) * channels;
                     block[k] = src[ki];
                     k++;
                 }
             }
-            Convolution99x11x55offset(block, cnndst, bb, bb, bd, partcnn);
-            for (y = bo; y < bsize - bo; y++)
+            Convolution99x11x55offset(block, cnndst, bb, bb, offset, partcnn);
+            for (y = 0; y < bsize; y++)
             {
-                yf = y0 + y;
+                yf = y0 + y + overlap;
                 if (yf < height)
                 {
-                    for (x = bo; x < bsize - bo; x++)
+                    for (x = 0; x < bsize; x++)
                     {
-                        xf = x0 + x;
+                        xf = x0 + x + overlap;
                         if (xf < width)
                         {
                             ki = (yf * width + xf) * channels;
-                            k = ((y + bd) * bb + x + bd);
+                            k = ((y + overlap + offset) * bb + x + offset + overlap);
                             src[ki] = block[k];
                         }
                     }
