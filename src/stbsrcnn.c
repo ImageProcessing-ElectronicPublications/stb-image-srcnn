@@ -147,6 +147,8 @@ int main(int argc, char **argv)
 //    Convolution99x11x55(resize_data, cnn_data, resize_height, resize_width, channels, pcnn);
     SRCNNblock(resize_data, cnn_block, cnn_data, resize_height, resize_width, channels, bsize, overlap, pcnn);
     printf("part CNN: %f\n", pcnn);
+    free(cnn_data);
+    free(cnn_block);
 
     printf("color: RGB\n");
     RGBtoYCbCrFilter(resize_data, resize_height, resize_width, channels, -1);
